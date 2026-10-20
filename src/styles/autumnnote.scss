@@ -3,6 +3,7 @@
  * Inspired by Summernote — rewritten with cleaner, modern CSS
  */
 
+@use 'sass:list';
 @use 'variables' as *;
 
 // Dark-mode rules for a selector nested under the editor: applies under
@@ -2956,7 +2957,7 @@ $an-video-accent: #8b5cf6; // violet-500
   align-items: center;
   justify-content: center;
   width: 32px;
-  margin-block: -(nth($an-toolbar-pad, 1));
+  margin-block: -(list.nth($an-toolbar-pad, 1));
   color: var(--an-text, #{$an-text});
   cursor: pointer;
   opacity: 0;
