@@ -30,7 +30,7 @@ describe('demo site version', () => {
 
   it('escapes HTML in the changelog text', () => {
     const html = releaseNotesHtml(version);
-    // The 4.1.0 entry mentions `<code class="language-…">` and `<script>`.
+    // Entries quote markup such as `<code class="language-…">`; it must come out escaped.
     expect(html).not.toMatch(/<script>/);
     expect(html).not.toMatch(/<pre>(?!<code)/);
   });
