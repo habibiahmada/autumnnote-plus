@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.2.0] - 2026-10-21
+
+A context menu that stays clear of the text you are typing and fits on a phone, a toolbar that shows when it scrolls, and docs for using the editor from a CDN, from other frameworks and with a server. No breaking changes: options, events and the API are the same as 4.1.0.
+
 ### Changed
 
 - **The context menu no longer covers what you are typing.** It used to open with its corner at the pointer, so a right-click just past the caret hid the rest of that line. It now finds the line being edited (the caret's or the selection's line nearest the click, or the caret's line for the keyboard menu key) and opens below it, or above it when there is no room below. When neither side has room for the whole menu, it takes the roomier side and scrolls.
