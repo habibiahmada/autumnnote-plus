@@ -59,11 +59,7 @@ export class VideoTooltip extends BaseMediaTooltip {
 
   destroy() {
     if (this._previewMode) this._exitPreview();
-    this._clearTimers();
-    this._disposers.forEach((d) => d());
-    this._disposers = [];
-    this._el?.remove();
-    this._el = null;
+    super.destroy();
   }
 
   // ---------------------------------------------------------------------------

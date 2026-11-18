@@ -131,7 +131,7 @@ const showAnchor = (lt, ctx, anchorHref = 'https://example.com') => {
     return a;
   })();
   anchor.getBoundingClientRect = () => ({ top: 50, bottom: 70, left: 100, right: 200, width: 100, height: 20 });
-  lt._activeAnchor = anchor; // _show() does not set _activeAnchor — set it manually
+  lt._active = anchor; // _show() does not set _active — set it manually
   lt._show(anchor);
   return anchor;
 };
@@ -173,7 +173,7 @@ describe('LinkTooltip._hide', () => {
     const { lt, ctx } = makeTooltip();
     showAnchor(lt, ctx);
     lt._hide();
-    expect(lt._activeAnchor).toBeNull();
+    expect(lt._active).toBeNull();
   });
 });
 
@@ -209,7 +209,7 @@ describe('LinkTooltip._scheduleShow', () => {
     const { lt, ctx } = makeTooltip();
     const anchor = ctx.layoutInfo.editable.querySelector('a');
     anchor.getBoundingClientRect = () => ({ top: 50, bottom: 70, left: 100, right: 200, width: 100, height: 20 });
-    lt._activeAnchor = anchor;
+    lt._active = anchor;
     lt._show(anchor);
     vi.spyOn(lt, '_show');
     lt._scheduleShow(anchor); // same anchor, already visible
@@ -259,7 +259,7 @@ describe('LinkTooltip._openLink', () => {
 
   it('does not throw when no active anchor', () => {
     const { lt } = makeTooltip();
-    lt._activeAnchor = null;
+    lt._active = null;
     expect(() => lt._openLink()).not.toThrow();
   });
 });
@@ -281,7 +281,7 @@ describe('LinkTooltip._editLink', () => {
 
   it('does nothing when no active anchor', () => {
     const { lt, ctx } = makeTooltip();
-    lt._activeAnchor = null;
+    lt._active = null;
     lt._editLink();
     expect(ctx.invoke).not.toHaveBeenCalled();
   });
@@ -297,7 +297,7 @@ describe('LinkTooltip._unlink', () => {
 
   it('does nothing when no active anchor', () => {
     const { lt, ctx } = makeTooltip();
-    lt._activeAnchor = null;
+    lt._active = null;
     lt._unlink();
     expect(ctx.invoke).not.toHaveBeenCalled();
   });
@@ -329,7 +329,7 @@ describe('LinkTooltip._copyLink', () => {
     const writeText = vi.fn();
     Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
     const { lt } = makeTooltip();
-    lt._activeAnchor = null;
+    lt._active = null;
     lt._copyLink();
     expect(writeText).not.toHaveBeenCalled();
   });
@@ -404,7 +404,7 @@ describe('LinkTooltip mouseover/mouseout event listeners', () => {
     const anchor = ctx.layoutInfo.editable.querySelector('a');
     anchor.getBoundingClientRect = () => ({ top: 50, bottom: 70, left: 100, right: 200, width: 100, height: 20 });
     // First show the tooltip
-    lt._activeAnchor = anchor;
+    lt._active = anchor;
     lt._show(anchor);
     expect(lt._el.style.display).toBe('flex');
 

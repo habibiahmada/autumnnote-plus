@@ -57,14 +57,6 @@ export class ImageTooltip extends BaseMediaTooltip {
     return this;
   }
 
-  destroy() {
-    this._clearTimers();
-    this._disposers.forEach((d) => d());
-    this._disposers = [];
-    this._el?.remove();
-    this._el = null;
-  }
-
   // ---------------------------------------------------------------------------
   // Build
   // ---------------------------------------------------------------------------
