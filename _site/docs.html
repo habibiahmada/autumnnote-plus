@@ -41,11 +41,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" />
-  <script type="module" crossorigin src="/assets/docs-DdeT2Qqj.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/site-B8EZi8Ht.js">
-  <link rel="modulepreload" crossorigin href="/assets/site-D6ZjWCM3.js">
-  <link rel="stylesheet" crossorigin href="/assets/site-DLFl0wTR.css">
-  <link rel="stylesheet" crossorigin href="/assets/site-fOJvfYOR.css">
+  <script type="module" crossorigin src="/assets/docs-b7MP-ERt.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/site-C00g-u2h.js">
+  <link rel="stylesheet" crossorigin href="/assets/site-SDWBZlQZ.css">
   <link rel="stylesheet" crossorigin href="/assets/docs-CmMxhP94.css">
 </head>
 <body class="docs-page">
@@ -53,7 +51,7 @@
 
   <header class="site-header">
     <div class="wrap site-header__inner">
-      <a class="wordmark" href="./" aria-label="autumnnote-plus home">autumnnote<span class="wordmark__plus" aria-hidden="true">+</span><span class="wordmark__version">v4.3.0</span></a>
+      <a class="wordmark" href="./" aria-label="autumnnote-plus home">autumnnote<span class="wordmark__plus" aria-hidden="true">+</span><span class="wordmark__version">v4.3.1</span></a>
       <nav class="site-nav" id="site-nav" aria-label="Main">
         <a class="site-nav__link" href="./">Home</a>
         <a class="site-nav__link" href="docs" aria-current="page">Docs</a>
@@ -107,7 +105,7 @@
       </div>
       <div class="sidebar-group">
         <p class="sidebar-group-title label">Features</p>
-        <a class="sidebar-link" href="#whats-new-latest">What's new in 4.3.0</a>
+        <a class="sidebar-link" href="#whats-new-latest">What's new in 4.3.1</a>
         <a class="sidebar-link sub" href="#whats-new-4-0">4.0.0: the fork</a>
         <a class="sidebar-link sub" href="#whats-new-3-1">What's new in 3.1.0</a>
         <a class="sidebar-link sub" href="#whats-new">What's new in 3.0.0</a>
@@ -136,7 +134,7 @@
     <main class="docs-main" id="docs-main">
     <p class="label">Documentation</p>
     <h1 class="page-title">API reference</h1>
-    <p class="page-sub">Every option, method and event in autumnnote-plus v4.3.0. The API matches Autumn Note 3.1.0, so code written for it runs unchanged.</p>
+    <p class="page-sub">Every option, method and event in autumnnote-plus v4.3.1. The API matches Autumn Note 3.1.0, so code written for it runs unchanged.</p>
 
     <!-- ── Installation ── -->
     <section class="docs-section" id="installation" aria-label="Installation">
@@ -163,8 +161,8 @@
       <p class="docs-p">No install and no build step: load the stylesheet and the script, then create an editor. The script defines a global <code>AutumnNote</code>. Pin the version in the URL, so a new release never changes your page without you.</p>
       <div class="code-wrap">
         <button class="copy-btn" type="button" data-copy-next aria-label="Copy code"><svg class="i i--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9h11v11H9z"/><path d="M15 9V4H4v11h5"/></svg><span data-copy-label>Copy</span></button>
-        <pre><code class="language-html">&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/autumnnote-plus@4.3.0/dist/autumnnote.css"&gt;
-&lt;script src="https://cdn.jsdelivr.net/npm/autumnnote-plus@4.3.0/dist/autumnnote.umd.js"&gt;&lt;/script&gt;
+        <pre><code class="language-html">&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/autumnnote-plus@4.3.1/dist/autumnnote.css"&gt;
+&lt;script src="https://cdn.jsdelivr.net/npm/autumnnote-plus@4.3.1/dist/autumnnote.umd.js"&gt;&lt;/script&gt;
 
 &lt;textarea id="editor"&gt;&lt;/textarea&gt;
 &lt;script&gt;
@@ -175,8 +173,8 @@
       <p class="docs-p">The script carries English only. For another interface language, load that locale's script after the main one; it registers itself. The files are <code>dist/i18n/&lt;code&gt;.umd.js</code> for <code>vi</code>, <code>ja</code>, <code>zh</code>, <code>fr</code>, <code>de</code>, <code>es</code>, <code>ko</code> and <code>id</code>.</p>
       <div class="code-wrap">
         <button class="copy-btn" type="button" data-copy-next aria-label="Copy code"><svg class="i i--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9h11v11H9z"/><path d="M15 9V4H4v11h5"/></svg><span data-copy-label>Copy</span></button>
-        <pre><code class="language-html">&lt;script src="https://cdn.jsdelivr.net/npm/autumnnote-plus@4.3.0/dist/autumnnote.umd.js"&gt;&lt;/script&gt;
-&lt;script src="https://cdn.jsdelivr.net/npm/autumnnote-plus@4.3.0/dist/i18n/id.umd.js"&gt;&lt;/script&gt;
+        <pre><code class="language-html">&lt;script src="https://cdn.jsdelivr.net/npm/autumnnote-plus@4.3.1/dist/autumnnote.umd.js"&gt;&lt;/script&gt;
+&lt;script src="https://cdn.jsdelivr.net/npm/autumnnote-plus@4.3.1/dist/i18n/id.umd.js"&gt;&lt;/script&gt;
 &lt;script&gt;
   AutumnNote.create('#editor', { lang: 'id' });
 &lt;/script&gt;</code></pre>
@@ -185,16 +183,16 @@
       <p class="docs-p">Browsers that support <code>&lt;script type="module"&gt;</code> can import the ES build straight from the CDN. Locales come from the package's <code>src/js/i18n/</code> folder and are registered with <code>registerLocale()</code>.</p>
       <div class="code-wrap">
         <button class="copy-btn" type="button" data-copy-next aria-label="Copy code"><svg class="i i--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9h11v11H9z"/><path d="M15 9V4H4v11h5"/></svg><span data-copy-label>Copy</span></button>
-        <pre><code class="language-html">&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/autumnnote-plus@4.3.0/dist/autumnnote.css"&gt;
+        <pre><code class="language-html">&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/autumnnote-plus@4.3.1/dist/autumnnote.css"&gt;
 &lt;script type="module"&gt;
-  import AutumnNote from 'https://cdn.jsdelivr.net/npm/autumnnote-plus@4.3.0/dist/autumnnote.es.js';
-  import { id } from 'https://cdn.jsdelivr.net/npm/autumnnote-plus@4.3.0/src/js/i18n/id.js';
+  import AutumnNote from 'https://cdn.jsdelivr.net/npm/autumnnote-plus@4.3.1/dist/autumnnote.es.js';
+  import { id } from 'https://cdn.jsdelivr.net/npm/autumnnote-plus@4.3.1/src/js/i18n/id.js';
 
   AutumnNote.registerLocale('id', id);
   AutumnNote.create('#editor', { lang: 'id' });
 &lt;/script&gt;</code></pre>
       </div>
-      <div class="callout"><strong>Integrity and other CDNs:</strong> with a pinned version you can add <code>integrity</code> and <code>crossorigin="anonymous"</code> to the tags; jsDelivr lists the hash for each file on the package's page. unpkg serves the same paths at <code>https://unpkg.com/autumnnote-plus@4.3.0/…</code>.</div>
+      <div class="callout"><strong>Integrity and other CDNs:</strong> with a pinned version you can add <code>integrity</code> and <code>crossorigin="anonymous"</code> to the tags; jsDelivr lists the hash for each file on the package's page. unpkg serves the same paths at <code>https://unpkg.com/autumnnote-plus@4.3.1/…</code>.</div>
     </section>
 
     <section class="docs-section" id="framework-wrappers" aria-label="Framework Wrappers">
@@ -798,13 +796,11 @@ const editor = AutumnNote.create('#editor', {
 
     <!-- ── What's New v3.1.0 ── -->
     <!-- Filled from this version's CHANGELOG.md entry at build time. -->
-    <section class="docs-section" id="whats-new-latest" aria-label="What's new in 4.3.0">
-      <h2 class="section-h">What's new <span class="badge">v4.3.0</span></h2>
-      <p class="docs-p">Transparent and frosted-glass menus, a toolbar you can tune on its own, and a Transparent swatch in every background colour picker, ported from upstream Autumn Note 3.2.0–3.3.0 and fitted to this fork: native-button swatches, dark-theme tokens and its own select styling. No breaking changes; every new token defaults to today's look.</p>
-      <h3 class="sub-h">Added</h3>
-      <ul class="docs-list"><li><strong>Transparent menus and a &quot;Transparent&quot; swatch</strong> (ported from upstream Autumn Note 3.2.0, <code>1e0a115</code>). Every menu and popup reads <code>--an-menu-bg</code>, <code>--an-menu-border</code>, <code>--an-menu-shadow</code> and <code>--an-menu-backdrop</code>, so <code>themeVars: { 'menu-bg': 'transparent' }</code> or a translucent colour with <code>'menu-backdrop': 'blur(10px)'</code> restyles all of them at once. The highlight, cell-background and border colour pickers gain a checkerboard <strong>Transparent</strong> swatch. In this fork the swatch stays a native <code>&lt;button&gt;</code> (reachable with Tab, fires on Enter and Space), and the dark-theme fallbacks stay on this fork's tokens (<code>--an-bg-raised</code>, <code>--an-border-strong</code>), so the default look does not change. The label is translated into all nine languages, Indonesian (<code>Transparan</code>) included.</li><li><strong>Adjustable menu opacity: <code>--an-menu-opacity</code></strong> (from upstream 3.3.0, <code>fdeedfe</code>). <code>0%</code>–<code>100%</code> (default <code>100%</code>) mixes each menu's own background, light or dark, with transparent where <code>color-mix()</code> is supported; it is ignored when <code>--an-menu-bg</code> is set. The <code>-webkit-backdrop-filter</code> prefix now comes from the build (Lightning CSS adds it from <code>browserslist</code>), because writing both with <code>var()</code> values let the minifier drop the unprefixed one.</li><li><strong>Adjustable toolbar transparency</strong> (from upstream 3.3.0, <code>1ce0465</code>). <code>--an-toolbar-opacity</code> makes the toolbar translucent and <code>--an-toolbar-backdrop</code> blurs what shows through it, such as content scrolling under a sticky toolbar.</li><li><strong>Frosted glass for every menu</strong> (from upstream 3.3.0, <code>a5e3cac</code>). <code>--an-menu-backdrop</code> (for example <code>blur(10px)</code>) reaches every menu, popover, tooltip and dialog, the image-crop toolbar now reads the same tokens (its look moved from inline styles to the stylesheet, default unchanged), and the styled <code>&lt;select&gt;</code> lists read them too. This fork keeps its own select styling and width locking (<code>lockSelectWidth</code>, sized in <code>em</code>); upstream's parallel implementation of the same feature is not ported.</li><li><strong>The toolbar and the menus are configured separately</strong> (from upstream 3.3.0, <code>8b1d863</code>). The toolbar has its own set, <code>--an-toolbar-bg</code>, <code>--an-toolbar-opacity</code>, <code>--an-toolbar-backdrop</code>, <code>--an-toolbar-border</code> and <code>--an-toolbar-shadow</code>, and no <code>--an-menu-*</code> token reaches it, so a frosted sticky toolbar and translucent menus can be tuned independently.</li></ul>
-      <h3 class="sub-h">Fixed</h3>
-      <ul class="docs-list"><li><strong>The table cell-background swatches are real buttons.</strong> They were <code>&lt;div&gt;</code>s without a role, so Tab skipped them and Enter or Space did nothing. Each is now a <code>&lt;button&gt;</code> named by its colour, like the toolbar's and context menu's swatches; the new Transparent swatches follow the same rule.</li></ul>
+    <section class="docs-section" id="whats-new-latest" aria-label="What's new in 4.3.1">
+      <h2 class="section-h">What's new <span class="badge">v4.3.1</span></h2>
+      <p class="docs-p">An internal cleanup release: the link, code and table tooltips now share one base class with the image and video tooltips. Behaviour, options, events and the API are the same as 4.3.0.</p>
+      <h3 class="sub-h">Changed</h3>
+      <ul class="docs-list"><li><strong>The link, code and table tooltips share <code>BaseMediaTooltip</code></strong>, as the image and video tooltips already did. Each carried its own copy of the button factory, show/hide timers, positioning and teardown; those copies are gone and each tooltip passes its delays and placement to the base instead, so their timing and position are unchanged. About 220 lines lighter in source and 0.2 KiB gzip in the full builds. Internal only: the per-tooltip <code>_activeAnchor</code>, <code>_activePre</code> and <code>_activeTable</code> fields are now <code>_active</code>.</li><li><strong>CI audit: GHSA-fc5q-39xc-vjpf is ignored</strong> (picomatch &lt;=4.0.7, ReDoS through repeated extglobs). No patched picomatch exists yet, and it is reached only through dev tooling (<code>@vitest/browser &gt; @vitest/mocker &gt; vite</code>), never at runtime; the published packages still have no dependencies. The entry in <code>pnpm-workspace.yaml</code> is to be removed once a fix ships, and other high advisories still fail the audit.</li></ul>
       <p class="docs-p">Earlier releases are in the <a href="https://github.com/habibiahmada/autumnnote-plus/blob/main/CHANGELOG.md">CHANGELOG</a> and on the <a href="https://github.com/habibiahmada/autumnnote-plus/releases">releases page</a>.</p>
     </section>
 
@@ -815,7 +811,7 @@ const editor = AutumnNote.create('#editor', {
       <p class="docs-p">Install <code>autumnnote-plus</code>, <code>autumnnote-plus-react</code> and <code>autumnnote-plus-vue</code>. File names inside the package (<code>dist/autumnnote.css</code>, <code>dist/autumnnote.umd.js</code>) stay the same. To keep existing <code>'autumnnote'</code> imports, install under an alias:</p>
       <div class="code-wrap">
         <button class="copy-btn" type="button" data-copy-next aria-label="Copy code"><svg class="i i--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9h11v11H9z"/><path d="M15 9V4H4v11h5"/></svg><span data-copy-label>Copy</span></button>
-        <pre><code class="language-bash">npm install autumnnote@npm:autumnnote-plus@^4.3.0</code></pre>
+        <pre><code class="language-bash">npm install autumnnote@npm:autumnnote-plus@^4.3.1</code></pre>
       </div>
       <h3 class="sub-h">The CDN build ships English only</h3>
       <p class="docs-p">The UMD, CJS and minified builds drop from 109.2 KB to 92.4 KB gzip. Each locale is its own script, <code>dist/i18n/&lt;code&gt;.umd.js</code>, that registers itself when loaded after the main one. ESM users are not affected.</p>
@@ -1234,7 +1230,7 @@ console.log(api?.version); // '1.0.0'</code></pre>
         </nav>
       </div>
       <div class="site-footer__base">
-        <span>autumnnote-plus v4.3.0</span>
+        <span>autumnnote-plus v4.3.1</span>
         <a href="https://github.com/habibiahmada/autumnnote-plus/blob/main/SECURITY.md" rel="noopener noreferrer">Report a vulnerability</a>
       </div>
     </div>
