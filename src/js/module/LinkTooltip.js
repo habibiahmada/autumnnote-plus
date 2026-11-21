@@ -1,6 +1,7 @@
 // LinkTooltip.js - Hover tooltip for links inside the editor
 // Displays a small action bar with: visit link, edit link, unlink
-import { createElement, on, portalOf, setIcon, svgIcon } from '../core/dom.js';
+import { createElement, on, portalOf, svgIcon } from '../core/dom.js';
+import { BaseMediaTooltip } from './BaseMediaTooltip.js';
 import { writeClipboard } from '../core/clipboard.js';
 import * as Style from '../editing/Style.js';
 import { PATHS } from '../core/icon-paths.js';
@@ -12,19 +13,12 @@ const ICONS = {
   copy:   svgIcon(PATHS.copy),
 };
 
-/** Delay in ms before showing / after hiding to avoid flicker */
-const SHOW_DELAY = 120;
-const HIDE_DELAY = 200;
-
-export class LinkTooltip {
+export class LinkTooltip extends BaseMediaTooltip {
   /** @param {import('../Context.js').Context} context */
   constructor(context) {
-    this.context = context;
-    this._el = null;
-    this._activeAnchor = null;
-    this._showTimer = null;
-    this._hideTimer = null;
-    this._disposers = [];
+    // Below the link, aligned with its start.
+    super(context, 120, 200, { above: false, center: false, w: 260, h: 34 });
+    this._keepHideTimer = true;
   }
 
   initialize() {
@@ -54,14 +48,6 @@ export class LinkTooltip {
     );
 
     return this;
-  }
-
-  destroy() {
-    this._clearTimers();
-    this._disposers.forEach((d) => d());
-    this._disposers = [];
-    if (this._el?.parentNode) this._el.remove();
-    this._el = null;
   }
 
   // ---------------------------------------------------------------------------
@@ -100,37 +86,8 @@ export class LinkTooltip {
     return el;
   }
 
-  _makeBtn(icon, title, handler) {
-    const btn = createElement('button', { type: 'button', class: 'an-link-tooltip-btn', title });
-    setIcon(btn, icon);
-    this._disposers.push(on(btn, 'click', (e) => { e.preventDefault(); e.stopPropagation(); handler(); }));
-    return btn;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Show / Hide logic
-  // ---------------------------------------------------------------------------
-
-  _scheduleShow(anchor) {
-    if (this._activeAnchor === anchor && this._el.style.display !== 'none') return;
-    clearTimeout(this._hideTimer);
-    this._hideTimer = null;
-    clearTimeout(this._showTimer);
-    this._showTimer = setTimeout(() => {
-      this._activeAnchor = anchor;
-      this._show(anchor);
-    }, SHOW_DELAY);
-  }
-
-  _scheduleHide() {
-    clearTimeout(this._showTimer);
-    this._showTimer = null;
-    if (this._hideTimer) return;
-    this._hideTimer = setTimeout(() => {
-      this._hide();
-    }, HIDE_DELAY);
-  }
-
+  // Positions synchronously: the label text sets the width, so there is no
+  // fresh layout to wait for.
   _show(anchor) {
     const isReadOnly = this.context.layoutInfo.container.classList.contains('an-disabled');
     const url = anchor.getAttribute('href') || '';
@@ -141,41 +98,6 @@ export class LinkTooltip {
     this._unlinkBtn.style.display = isReadOnly ? 'none' : '';
     this._el.style.display = 'flex';
     this._positionNear(anchor);
-  }
-
-  _hide() {
-    this._el.style.display = 'none';
-    this._activeAnchor = null;
-    this._clearTimers();
-  }
-
-  _clearTimers() {
-    clearTimeout(this._showTimer);
-    clearTimeout(this._hideTimer);
-    this._showTimer = null;
-    this._hideTimer = null;
-  }
-
-  _positionNear(anchor) {
-    const rect   = anchor.getBoundingClientRect();
-    const tipW   = this._el.offsetWidth  || 260;
-    const tipH   = this._el.offsetHeight || 34;
-    const margin = 6;
-
-    // Prefer below the link; if no room, put above
-    let top  = rect.bottom + margin;
-    let left = rect.left;
-
-    if (top + tipH > globalThis.innerHeight - margin) {
-      top = rect.top - tipH - margin;
-    }
-    if (left + tipW > globalThis.innerWidth - margin) {
-      left = globalThis.innerWidth - tipW - margin;
-    }
-    if (left < margin) left = margin;
-
-    this._el.style.top  = `${top}px`;
-    this._el.style.left = `${left}px`;
   }
 
   _truncateUrl(url) {
@@ -193,13 +115,13 @@ export class LinkTooltip {
   // ---------------------------------------------------------------------------
 
   _openLink() {
-    const url = this._activeAnchor?.getAttribute('href');
+    const url = this._active?.getAttribute('href');
     if (url) globalThis.open(url, '_blank', 'noopener,noreferrer');
     this._hide();
   }
 
   _copyLink() {
-    const url = this._activeAnchor?.getAttribute('href');
+    const url = this._active?.getAttribute('href');
     if (url) {
       writeClipboard({ text: url }).catch(() => {});
     }
@@ -211,7 +133,7 @@ export class LinkTooltip {
   }
 
   _editLink() {
-    const anchor = this._activeAnchor;
+    const anchor = this._active;
     if (!anchor) return;
     this._hide();
 
@@ -226,7 +148,7 @@ export class LinkTooltip {
   }
 
   _unlink() {
-    const anchor = this._activeAnchor;
+    const anchor = this._active;
     if (!anchor) return;
     this._hide();
 

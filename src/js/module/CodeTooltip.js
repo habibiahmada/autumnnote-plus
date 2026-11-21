@@ -6,9 +6,8 @@ import { secureExternalAsset } from '../core/externalAsset.js';
 import { writeClipboard } from '../core/clipboard.js';
 import { PATHS } from '../core/icon-paths.js';
 import { detectLang } from '../core/detectLang.js';
+import { BaseMediaTooltip } from './BaseMediaTooltip.js';
 
-const SHOW_DELAY = 100;
-const HIDE_DELAY = 180;
 
 // Cached regex for extracting language class — defined once at module level.
 const _LANG_CLASS_RE = /language-(\S+)/;
@@ -50,15 +49,11 @@ function _setLanguageClass(el, lang) {
   if (lang) el.classList.add(`language-${lang}`);
 }
 
-export class CodeTooltip {
+export class CodeTooltip extends BaseMediaTooltip {
   /** @param {import('../Context.js').Context} context */
   constructor(context) {
-    this.context = context;
-    this._el = null;
-    this._activePre = null;
-    this._showTimer = null;
-    this._hideTimer = null;
-    this._disposers = [];
+    // Above the block, centered; delays are the base defaults.
+    super(context, undefined, undefined, { above: true, center: true, w: 260, h: 32 });
     this._copyBtn = null;
     this._wrapBtn = null;
     this._lineNumbersBtn = null;
@@ -102,8 +97,8 @@ export class CodeTooltip {
       }),
       on(document, 'click', (e) => {
         const et = /** @type {Node} */ (e.target);
-        if (this._activePre &&
-          !this._activePre.contains(et) &&
+        if (this._active &&
+          !this._active.contains(et) &&
           !this._el.contains(et)) {
           this._hide();
         }
@@ -114,13 +109,9 @@ export class CodeTooltip {
   }
 
   destroy() {
-    this._clearTimers();
     this._asyncDisposers.forEach((dispose) => dispose());
     this._asyncDisposers = [];
-    this._disposers.forEach((d) => d());
-    this._disposers = [];
-    this._el?.remove();
-    this._el = null;
+    super.destroy();
   }
 
   // ---------------------------------------------------------------------------
@@ -197,89 +188,16 @@ export class CodeTooltip {
     return createElement('div', { class: 'an-link-tooltip-sep' });
   }
 
-  /**
-   * @param {string} icon
-   * @param {string} title
-   * @param {Function} handler
-   * @param {boolean} [isDanger]
-   */
-  _makeBtn(icon, title, handler, isDanger = false) {
-    const btn = createElement('button', {
-      type: 'button',
-      class: isDanger ? 'an-link-tooltip-btn an-link-tooltip-btn--danger' : 'an-link-tooltip-btn',
-      title,
-    });
-    setIcon(btn, icon);
-    this._disposers.push(on(btn, 'click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      handler();
-    }));
-    return btn;
-  }
-
   // ---------------------------------------------------------------------------
-  // Show / Hide
+  // Show
   // ---------------------------------------------------------------------------
-
-  _scheduleShow(pre) {
-    if (this._activePre === pre && this._el.style.display !== 'none') return;
-    clearTimeout(this._hideTimer);
-    this._hideTimer = null;
-    clearTimeout(this._showTimer);
-    this._showTimer = setTimeout(() => {
-      this._activePre = pre;
-      this._syncWrapBtn();
-      this._syncLineNumbersBtn();
-      this._syncLangSelect();
-      this._show(pre);
-    }, SHOW_DELAY);
-  }
-
-  _scheduleHide() {
-    clearTimeout(this._showTimer);
-    this._showTimer = null;
-    // Always reset the hide timer so rapid mouseout→mouseover sequences
-    // don't leave a stale timer that hides the tooltip prematurely.
-    clearTimeout(this._hideTimer);
-    this._hideTimer = setTimeout(() => this._hide(), HIDE_DELAY);
-  }
 
   _show(pre) {
+    this._syncWrapBtn();
+    this._syncLineNumbersBtn();
+    this._syncLangSelect();
     this._el.style.display = 'flex';
     this._positionNear(pre);
-  }
-
-  _hide() {
-    this._el.style.display = 'none';
-    this._activePre = null;
-    this._clearTimers();
-  }
-
-  _clearTimers() {
-    clearTimeout(this._showTimer);
-    clearTimeout(this._hideTimer);
-    this._showTimer = null;
-    this._hideTimer = null;
-  }
-
-  _positionNear(pre) {
-    const rect   = pre.getBoundingClientRect();
-    const tipW   = this._el.offsetWidth  || 260;
-    const tipH   = this._el.offsetHeight || 32;
-    const margin = 6;
-
-    // Prefer above the block; fall back to below
-    let top  = rect.top - tipH - margin;
-    let left = rect.left + (rect.width - tipW) / 2;
-
-    if (top < margin) top = rect.bottom + margin;
-    if (left + tipW > globalThis.innerWidth  - margin) left = globalThis.innerWidth  - tipW - margin;
-    if (left < margin) left = margin;
-
-    // Tooltip uses position:fixed, so viewport coordinates are used directly.
-    this._el.style.top  = `${top}px`;
-    this._el.style.left = `${left}px`;
   }
 
   // ---------------------------------------------------------------------------
@@ -287,9 +205,9 @@ export class CodeTooltip {
   // ---------------------------------------------------------------------------
 
   _syncWrapBtn() {
-    if (!this._activePre || !this._wrapBtn) return;
-    const wrapped = (this._activePre.style.whiteSpace || '').includes('pre-wrap')
-      || globalThis.getComputedStyle(this._activePre).whiteSpace === 'pre-wrap';
+    if (!this._active || !this._wrapBtn) return;
+    const wrapped = (this._active.style.whiteSpace || '').includes('pre-wrap')
+      || globalThis.getComputedStyle(this._active).whiteSpace === 'pre-wrap';
     this._wrapBtn.classList.toggle('active', wrapped);
     this._wrapBtn.title = wrapped
       ? this.context.locale.tooltips.code.disableWordWrap
@@ -297,16 +215,16 @@ export class CodeTooltip {
   }
 
   _syncLineNumbersBtn() {
-    if (!this._activePre || !this._lineNumbersBtn) return;
-    const on = this._activePre.classList.contains('an-code-line-numbers');
+    if (!this._active || !this._lineNumbersBtn) return;
+    const on = this._active.classList.contains('an-code-line-numbers');
     this._lineNumbersBtn.classList.toggle('active', on);
     this._lineNumbersBtn.title = this.context.locale.tooltips.code.lineNumbers;
   }
 
   _syncLangSelect() {
-    if (!this._activePre || !this._langSelect) return;
-    const codeEl = this._activePre.querySelector('code');
-    const fromAttr = this._activePre.dataset.language || '';
+    if (!this._active || !this._langSelect) return;
+    const codeEl = this._active.querySelector('code');
+    const fromAttr = this._active.dataset.language || '';
     const fromClass = codeEl ? (_LANG_CLASS_RE.exec(codeEl.className) || [])[1] || '' : '';
     this._langSelect.value = fromAttr || fromClass || '';
   }
@@ -316,7 +234,7 @@ export class CodeTooltip {
   // ---------------------------------------------------------------------------
 
   _copyCode() {
-    const pre = this._activePre;
+    const pre = this._active;
     if (!pre) return;
     const text = pre.textContent || '';
     writeClipboard({ text }).then(() => this._flashCopied()).catch(() => {});
@@ -336,7 +254,7 @@ export class CodeTooltip {
   }
 
   _toggleWrap() {
-    const pre = this._activePre;
+    const pre = this._active;
     if (!pre) return;
     const isWrapped = pre.style.whiteSpace === 'pre-wrap';
     pre.style.whiteSpace = isWrapped ? 'pre' : 'pre-wrap';
@@ -346,7 +264,7 @@ export class CodeTooltip {
   }
 
   _toggleLineNumbers() {
-    const pre = this._activePre;
+    const pre = this._active;
     if (!pre) return;
     pre.classList.toggle('an-code-line-numbers');
     this._syncLineNumbersBtn();
@@ -419,19 +337,19 @@ export class CodeTooltip {
   applyLanguage(pre, lang) {
     if (!pre || !lang) return;
     // Temporarily set activePre so _onLangChange can target it
-    const savedPre = this._activePre;
-    this._activePre = pre;
+    const savedPre = this._active;
+    this._active = pre;
     if (this._langSelect) this._langSelect.value = lang;
     this._onLangChange();
     // Update the select to reflect the detected language when tooltip is shown
     if (this._langSelect) this._langSelect.value = lang;
-    this._activePre = savedPre || pre;
+    this._active = savedPre || pre;
     // Don't restore savedPre if it was null — keep `pre` as activePre so that
     // the tooltip select is correct the first time the user hovers over it.
   }
 
   _onLangChange() {
-    const pre = this._activePre;
+    const pre = this._active;
     if (!pre) return;
     const lang = this._langSelect.value;
     const _w = /** @type {any} */ (globalThis);
@@ -586,7 +504,7 @@ export class CodeTooltip {
   }
 
   _toParagraph() {
-    const pre = this._activePre;
+    const pre = this._active;
     if (!pre) return;
     const editable = this.context.layoutInfo.editable;
     if (!editable) return;
@@ -605,7 +523,7 @@ export class CodeTooltip {
   }
 
   _delete() {
-    const pre = this._activePre;
+    const pre = this._active;
     if (!pre) return;
     this._hide();
     pre.remove();

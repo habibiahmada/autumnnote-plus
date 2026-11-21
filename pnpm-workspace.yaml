@@ -23,6 +23,15 @@ overrides:
   source-map-js: '>=1.2.2'
   # Caret, not >=: a vite major would change the build, not just patch it.
   vite: '^8.2.4'
+auditConfig:
+  # picomatch <=4.0.7 (GHSA-fc5q-39xc-vjpf, ReDoS through repeated extglobs).
+  # No patched release exists yet: 4.0.7 is the latest on npm, so there is
+  # nothing to override to. picomatch is reached only through dev tooling
+  # (@vitest/browser > @vitest/mocker > vite) and only matches the project's own
+  # globs, never input from users. Remove this entry once picomatch ships a
+  # fix, and add a `picomatch` override above if vite does not pick it up.
+  ignoreGhsas:
+    - GHSA-fc5q-39xc-vjpf
 allowBuilds:
   '@parcel/watcher': true
   esbuild: true

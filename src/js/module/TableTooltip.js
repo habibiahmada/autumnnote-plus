@@ -4,6 +4,7 @@
 import { createElement, on, portalOf, setIcon } from '../core/dom.js';
 import { paintSwatch, TRANSPARENT } from '../core/palette.js';
 import { ICONS } from './table-icons.js';
+import { BaseMediaTooltip } from './BaseMediaTooltip.js';
 import {
   getVisualColIndex,
   getCellAtVisualCol,
@@ -12,22 +13,22 @@ import {
 } from './table-grid.js';
 import { DEFAULT_COLOR_PALETTE } from '../core/palette.js';
 
-const SHOW_DELAY = 120;
-const HIDE_DELAY = 200;
 
 // Cell shading always offers the stock swatches (not the host's colorPalette).
 const SHADE_PRESETS = DEFAULT_COLOR_PALETTE;
 
-export class TableTooltip {
+export class TableTooltip extends BaseMediaTooltip {
   /** @param {import('../Context.js').Context} context */
   constructor(context) {
-    this.context = context;
-    this._el = null;
-    this._activeTable = null;
+    // Above the table, centered.
+    super(context, 120, 200, { above: true, center: true, w: 400, h: 30 });
+    this._keepHideTimer = true;
+    // The active <table>. Kept as loose as it was before this module shared
+    // BaseMediaTooltip: the cell code below reads it through querySelector,
+    // which TypeScript types as plain Element.
+    /** @type {any} */
+    this._active = null;
     this._activeCell = null;  // last hovered td/th
-    this._showTimer = null;
-    this._hideTimer = null;
-    this._disposers = [];
     this._sizePopover = null;
     this._sizeApply = null;
     this._sizeTitleEl = null;
@@ -74,7 +75,7 @@ export class TableTooltip {
       // Don't interfere with col/row resize (inline cursor is set by resize logic)
       if (cell.style.cursor === 'col-resize' || cell.style.cursor === 'row-resize') return;
       e.preventDefault(); // suppress text-cursor placement while selecting cells
-      this._activeTable = cell.closest('table');
+      this._active = cell.closest('table');
       this._selectStart = cell;
       this._selectDragging = true;
       this._setSelection([cell]);
@@ -83,7 +84,7 @@ export class TableTooltip {
       if (!this._selectMode || !this._selectDragging || !this._selectStart) return;
       const cell = e.target.closest('td, th');
       if (!cell || !editable.contains(cell)) return;
-      if (cell.closest('table') !== this._activeTable) return;
+      if (cell.closest('table') !== this._active) return;
       this._setSelection(this._getRectCells(this._selectStart, cell));
     };
     const onSelMouseup = () => { this._selectDragging = false; };
@@ -118,9 +119,9 @@ export class TableTooltip {
       }, { passive: true }),
       on(document, 'click', (e) => {
         const et = /** @type {Node} */ (e.target);
-        if (this._selectMode && this._activeTable?.contains(et)) return;
-        if (this._activeTable &&
-          !this._activeTable.contains(et) &&
+        if (this._selectMode && this._active?.contains(et)) return;
+        if (this._active &&
+          !this._active.contains(et) &&
           !this._el.contains(et) &&
           !this._sizePopover?.contains(et) &&
           !this._shadePopover?.contains(et) &&
@@ -289,23 +290,11 @@ export class TableTooltip {
   }
 
   destroy() {
-    this._clearTimers();
-    this._disposers.forEach((d) => d());
-    this._disposers = [];
-    if (this._el?.parentNode) this._el.remove();
-    this._el = null;
-    if (this._sizePopover?.parentNode) {
-      this._sizePopover.remove();
-    }
-    this._sizePopover = null;
-    if (this._shadePopover?.parentNode) {
-      this._shadePopover.remove();
-    }
-    this._shadePopover = null;
-    if (this._borderColorPopover?.parentNode) {
-      this._borderColorPopover.remove();
-    }
-    this._borderColorPopover = null;
+    super.destroy();
+    this._sizePopover?.remove();
+    this._shadePopover?.remove();
+    this._borderColorPopover?.remove();
+    this._sizePopover = this._shadePopover = this._borderColorPopover = null;
   }
 
   // ---------------------------------------------------------------------------
@@ -441,60 +430,15 @@ export class TableTooltip {
     return createElement('div', { class: 'an-link-tooltip-sep' });
   }
 
-  /**
-   * @param {string} icon
-   * @param {string} title
-   * @param {Function} handler
-   * @param {boolean} [isDanger]
-   */
-  _makeBtn(icon, title, handler, isDanger = false) {
-    const btn = createElement('button', {
-      type: 'button',
-      class: isDanger
-        ? 'an-link-tooltip-btn an-link-tooltip-btn--danger'
-        : 'an-link-tooltip-btn',
-      title,
-    });
-    setIcon(btn, icon);
-    this._disposers.push(on(btn, 'click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      handler();
-    }));
-    return btn;
-  }
-
   // ---------------------------------------------------------------------------
   // Show / Hide
   // ---------------------------------------------------------------------------
 
-  _scheduleShow(table) {
-    if (this._activeTable === table && this._el.style.display !== 'none') return;
-    clearTimeout(this._hideTimer);
-    this._hideTimer = null;
-    clearTimeout(this._showTimer);
-    this._showTimer = setTimeout(() => {
-      this._activeTable = table;
-      this._show();
-    }, SHOW_DELAY);
-  }
-
-  _scheduleHide() {
-    clearTimeout(this._showTimer);
-    this._showTimer = null;
-    if (this._hideTimer) return;
-    this._hideTimer = setTimeout(() => this._hide(), HIDE_DELAY);
-  }
-
   _show() {
-    if (!this._activeTable) return;
-    this._el.style.display = 'flex';
+    if (!this._active) return;
+    super._show();
     this._syncShadeStrip();
     this._syncBorderColorStrip();
-    // Defer: offsetWidth on a newly-visible element forces layout synchronously
-    requestAnimationFrame(() => {
-      if (this._activeTable) this._positionNear(this._activeTable);
-    });
   }
 
   _syncShadeStrip() {
@@ -503,9 +447,7 @@ export class TableTooltip {
     paintSwatch(this._shadeColorStrip, cell?.style.backgroundColor);
   }
 
-  _hide() {
-    this._el.style.display = 'none';
-    this._activeTable = null;
+  _beforeHide() {
     this._activeCell = null;
     // Reset select mode
     if (this._selectMode) {
@@ -517,35 +459,8 @@ export class TableTooltip {
       if (this._editable) this._editable.classList.remove('an-table-select-mode');
     }
     this._clearSelection();
-    this._clearTimers();
     this._hideSizePopover();
     this._hideBorderColorPopover();
-  }
-
-  _clearTimers() {
-    clearTimeout(this._showTimer);
-    clearTimeout(this._hideTimer);
-    this._showTimer = null;
-    this._hideTimer = null;
-  }
-
-  _positionNear(table) {
-    if (!table) return;
-    const rect   = table.getBoundingClientRect();
-    const tipW   = this._el.offsetWidth  || 400;
-    const tipH   = this._el.offsetHeight || 30;
-    const margin = 6;
-
-    // Center horizontally over the table; prefer above it
-    let left = rect.left + (rect.width - tipW) / 2;
-    let top  = rect.top - tipH - margin;
-
-    if (top  < margin)                           top  = rect.bottom + margin;
-    if (left + tipW > globalThis.innerWidth - margin) left = globalThis.innerWidth - tipW - margin;
-    if (left < margin)                            left = margin;
-
-    this._el.style.left = `${left}px`;
-    this._el.style.top  = `${top}px`;
   }
 
   // ---------------------------------------------------------------------------
@@ -559,12 +474,12 @@ export class TableTooltip {
       let container = sel.getRangeAt(0).commonAncestorContainer;
       if (container.nodeType === 3) container = container.parentElement;
       const cellFromSel = /** @type {Element} */ (container)?.closest('td, th');
-      if (cellFromSel && this._activeTable?.contains(cellFromSel)) {
+      if (cellFromSel && this._active?.contains(cellFromSel)) {
         return cellFromSel;
       }
     }
     return this._activeCell
-      || this._activeTable?.querySelector('td, th');
+      || this._active?.querySelector('td, th');
   }
 
   // ---------------------------------------------------------------------------
@@ -701,7 +616,7 @@ export class TableTooltip {
     }
     if (position === 'above') refRow.parentElement?.insertBefore(newRow, refRow);
     else refRow.after(newRow);
-    requestAnimationFrame(() => this._positionNear(this._activeTable));
+    requestAnimationFrame(() => this._positionNear(this._active));
     this.context.invoke('editor.afterCommand');
   }
 
@@ -720,7 +635,7 @@ export class TableTooltip {
     rows.forEach((r, i) => {
       r.insertBefore(createElement(isHeaders[i] ? 'th' : 'td', {}, ['\u00a0']), refs[i]);
     });
-    requestAnimationFrame(() => this._positionNear(this._activeTable));
+    requestAnimationFrame(() => this._positionNear(this._active));
     this.context.invoke('editor.afterCommand');
   }
 
@@ -740,7 +655,7 @@ export class TableTooltip {
     this._activeCell = null;
     this._clearSelection();
     selectedRows.forEach((r) => r.remove());
-    requestAnimationFrame(() => this._positionNear(this._activeTable));
+    requestAnimationFrame(() => this._positionNear(this._active));
     this.context.invoke('editor.afterCommand');
   }
 
@@ -764,7 +679,7 @@ export class TableTooltip {
     this._activeCell = null;
     this._clearSelection();
     cellsToDelete.forEach((c) => c.remove());
-    requestAnimationFrame(() => this._positionNear(this._activeTable));
+    requestAnimationFrame(() => this._positionNear(this._active));
     this.context.invoke('editor.afterCommand');
   }
 
@@ -844,7 +759,7 @@ export class TableTooltip {
   }
 
   _deleteTable() {
-    const table = this._activeTable;
+    const table = this._active;
     if (!table) return;
     this._hide();
     if (table.parentNode) table.remove();
@@ -864,7 +779,7 @@ export class TableTooltip {
       if (table.contains(cell)) this._unmergeOne(cell, table);
     });
     this._clearSelection();
-    requestAnimationFrame(() => this._positionNear(this._activeTable));
+    requestAnimationFrame(() => this._positionNear(this._active));
     this.context.invoke('editor.afterCommand');
   }
 
@@ -1268,7 +1183,7 @@ export class TableTooltip {
   }
 
   _applyBorderColor(color) {
-    const table = this._activeTable;
+    const table = this._active;
     if (!table) return;
     Array.from(table.querySelectorAll('td, th')).forEach((c) => { c.style.borderColor = color; });
     if (this._borderColorStrip) {
@@ -1280,7 +1195,7 @@ export class TableTooltip {
 
   _syncBorderColorStrip() {
     if (!this._borderColorStrip || !this._el || this._el.style.display === 'none') return;
-    const firstCell = this._activeTable?.querySelector('td, th');
+    const firstCell = this._active?.querySelector('td, th');
     paintSwatch(this._borderColorStrip, /** @type {HTMLElement|undefined} */ (firstCell)?.style.borderColor);
   }
 
@@ -1299,7 +1214,7 @@ export class TableTooltip {
   // ---------------------------------------------------------------------------
 
   _toggleHeaderRow() {
-    const table = this._activeTable;
+    const table = this._active;
     if (!table) return;
     const firstRow = table.querySelector('tr');
     if (!firstRow) return;
@@ -1342,7 +1257,7 @@ export class TableTooltip {
   }
 
   _sortColumn(direction) {
-    const table = this._activeTable;
+    const table = this._active;
     if (!table) return;
     const cell = this._getCell();
     if (!cell) return;
@@ -1391,7 +1306,7 @@ export class TableTooltip {
   }
 
   _exportTableCSV() {
-    const table = this._activeTable;
+    const table = this._active;
     if (!table) return;
     const rows = Array.from(table.querySelectorAll('tr'));
     const csv = rows.map((row) =>
