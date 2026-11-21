@@ -15,7 +15,7 @@ They are an unofficial fork of Autumn Note (`autumnnote`). Keep the fork notice 
 Changes reach `main` only through `dev` → `staging` → `main` (see "Branches" in [CONTRIBUTING.md](../CONTRIBUTING.md#branches)), so a release is checked on the staging Preview before it goes out.
 
 1. A commit to `main` changes the version in `package.json`.
-2. **Auto Release** (`.github/workflows/auto-release.yml`) tags `v<version>`, creates the GitHub Release and starts **Publish to npm**.
+2. **Auto Release** (`.github/workflows/auto-release.yml`) creates the annotated tag `v<version>` and the GitHub Release, both carrying the release notes from `docs/releases/v<version>.md`, and starts **Publish to npm**. Without that file it stops before tagging anything.
 3. **Publish to npm** (`.github/workflows/publish.yml`) runs the browser tests on Chromium, Firefox and WebKit, checks that all three `package.json` versions match the tag, runs `pnpm check` and `pnpm audit`, and publishes each package whose version is not on npm yet, through npm trusted publishing (no token; every version gets a provenance attestation).
 
 So **pushing a version bump to `main` is a release.** Do it only when the version is ready to go out.
@@ -85,9 +85,10 @@ Publish to npm will then start from the release event and skip every package tha
 
 1. Update `CHANGELOG.md`: move the entries under `## [Unreleased]` into a new `## [x.y.z] - YYYY-MM-DD` section.
 2. Set the same version in `package.json`, `packages/react/package.json` and `packages/vue/package.json`. If the core's major version changes, update the wrappers' `peerDependencies` range for `autumnnote-plus` too.
-3. Commit on `dev`, open a pull request from `dev` to `staging`, and merge it once CI is green.
-4. Check the staging Preview at <https://staging-autumnnote-plus.habibiahmadaziz.workers.dev> once the Cloudflare check on the merge commit is green.
-5. Open a pull request from `staging` to `main` and merge it once CI is green. That merge is the release: Auto Release and Publish to npm do the rest; watch both runs in the Actions tab.
+3. Write the release notes in `docs/releases/vX.Y.Z.md` (copy the previous version's file as a start). They become both the tag message and the GitHub Release body, so the pull request is where they are reviewed. `test/docs/release-notes.test.js` fails CI unless the file has these `##` sections in this order, none of them empty (write "None." when a section does not apply): Summary, Highlights, Added, Changed, Fixed, Removed, Deprecated, Security, Breaking Changes, Migration / Upgrade Guide, Installation, Known Issues, Full Changelog. Installation commands must pin this version, and Full Changelog is the single link `https://github.com/habibiahmada/autumnnote-plus/compare/vPREV...vX.Y.Z`. Inside the file, avoid lines that start with `## ` in code blocks: they would read as a new section.
+4. Commit on `dev`, open a pull request from `dev` to `staging`, and merge it once CI is green.
+5. Check the staging Preview at <https://staging-autumnnote-plus.habibiahmadaziz.workers.dev> once the Cloudflare check on the merge commit is green.
+6. Open a pull request from `staging` to `main` and merge it once CI is green. That merge is the release: Auto Release and Publish to npm do the rest; watch both runs in the Actions tab. If Auto Release stopped on missing notes, add the file through `dev` → `staging` → `main` and re-run Auto Release from the Actions tab (it skips a tag or release that already exists).
 
 `staging` and `main` are protected: a direct push is refused, and the branch-policy check rejects a pull request into `main` from anywhere but `staging`.
 
