@@ -9,9 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.3.1] - 2026-11-21
+
+An internal cleanup release: the link, code and table tooltips now share one base class with the image and video tooltips. Behaviour, options, events and the API are the same as 4.3.0.
+
 ### Changed
 
 - **The link, code and table tooltips share `BaseMediaTooltip`**, as the image and video tooltips already did. Each carried its own copy of the button factory, show/hide timers, positioning and teardown; those copies are gone and each tooltip passes its delays and placement to the base instead, so their timing and position are unchanged. About 220 lines lighter in source and 0.2 KiB gzip in the full builds. Internal only: the per-tooltip `_activeAnchor`, `_activePre` and `_activeTable` fields are now `_active`.
+- **CI audit: GHSA-fc5q-39xc-vjpf is ignored** (picomatch <=4.0.7, ReDoS through repeated extglobs). No patched picomatch exists yet, and it is reached only through dev tooling (`@vitest/browser > @vitest/mocker > vite`), never at runtime; the published packages still have no dependencies. The entry in `pnpm-workspace.yaml` is to be removed once a fix ships, and other high advisories still fail the audit.
 
 ## [4.3.0] - 2026-11-05
 
