@@ -30,6 +30,19 @@ jobs:
           VERSION=$(node -p "require('./package.json').version")
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+          echo "notes=docs/releases/v$VERSION.md" >> "$GITHUB_OUTPUT"
+
+      # The release notes are written and reviewed in the version-bump pull
+      # request (docs/releases/v<version>.md; test/docs/release-notes.test.js
+      # fails CI without them). Stop here, before anything is tagged, if they
+      # are missing.
+      - name: Check release notes
+        run: |
+          NOTES="${{ steps.version.outputs.notes }}"
+          if [ ! -s "$NOTES" ]; then
+            echo "::error file=$NOTES::Release notes $NOTES are missing or empty. Add them, then re-run this workflow."
+            exit 1
+          fi
 
       - name: Create tag if missing
         run: |
@@ -39,7 +52,10 @@ jobs:
           if git rev-parse "$TAG" >/dev/null 2>&1; then
             echo "Tag $TAG already exists, skipping tag creation."
           else
-            git tag -a "$TAG" -m "$TAG"
+            # The tag message is the full release notes. --cleanup=verbatim
+            # keeps the Markdown headings: by default git drops every line
+            # that starts with '#' as a comment.
+            git tag -a "$TAG" -F "${{ steps.version.outputs.notes }}" --cleanup=verbatim
             git push origin "$TAG"
           fi
 
@@ -53,7 +69,7 @@ jobs:
             echo "Release $TAG already exists, skipping."
             echo "created=false" >> "$GITHUB_OUTPUT"
           else
-            gh release create "$TAG" --title "$TAG" --generate-notes
+            gh release create "$TAG" --title "$TAG" --notes-file "${{ steps.version.outputs.notes }}"
             echo "created=true" >> "$GITHUB_OUTPUT"
           fi
 
