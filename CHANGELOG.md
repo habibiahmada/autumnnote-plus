@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **The link, code and table tooltips share `BaseMediaTooltip`**, as the image and video tooltips already did. Each carried its own copy of the button factory, show/hide timers, positioning and teardown; those copies are gone and each tooltip passes its delays and placement to the base instead, so their timing and position are unchanged. About 220 lines lighter in source and 0.2 KiB gzip in the full builds. Internal only: the per-tooltip `_activeAnchor`, `_activePre` and `_activeTable` fields are now `_active`.
+
 ## [4.3.0] - 2026-11-05
 
 Transparent and frosted-glass menus, a toolbar you can tune on its own, and a Transparent swatch in every background colour picker, ported from upstream Autumn Note 3.2.0–3.3.0 and fitted to this fork: native-button swatches, dark-theme tokens and its own select styling. No breaking changes; every new token defaults to today's look.

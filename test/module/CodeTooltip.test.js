@@ -105,7 +105,7 @@ describe('CodeTooltip._show', () => {
     const { ct, ctx } = makeTooltip();
     const pre = ctx.layoutInfo.editable.querySelector('pre');
     pre.getBoundingClientRect = () => ({ top: 50, bottom: 200, left: 40, right: 400, width: 360, height: 150 });
-    ct._activePre = pre;
+    ct._active = pre;
     ct._show(pre);
     expect(ct._el.style.display).toBe('flex');
   });
@@ -116,7 +116,7 @@ describe('CodeTooltip._hide', () => {
     const { ct, ctx } = makeTooltip();
     const pre = ctx.layoutInfo.editable.querySelector('pre');
     pre.getBoundingClientRect = () => ({ top: 50, bottom: 200, left: 40, right: 400, width: 360, height: 150 });
-    ct._activePre = pre;
+    ct._active = pre;
     ct._show(pre);
     ct._hide();
     expect(ct._el.style.display).toBe('none');
@@ -152,7 +152,7 @@ describe('CodeTooltip timer management', () => {
     const { ct, ctx } = makeTooltip();
     const pre = ctx.layoutInfo.editable.querySelector('pre');
     pre.getBoundingClientRect = () => ({ top: 50, bottom: 200, left: 40, right: 400, width: 360, height: 150 });
-    ct._activePre = pre;
+    ct._active = pre;
     ct._show(pre);
     ct._scheduleHide();
     vi.advanceTimersByTime(300);
@@ -169,7 +169,7 @@ describe('CodeTooltip._copyCode', () => {
     const { ct, ctx } = makeTooltip();
     const pre = ctx.layoutInfo.editable.querySelector('pre');
     pre.getBoundingClientRect = () => ({ top: 50, bottom: 200, left: 40, right: 400, width: 360, height: 150 });
-    ct._activePre = pre;
+    ct._active = pre;
     ct._show(pre);
     ct._copyCode();
     expect(writeText).toHaveBeenCalledWith('const x = 1;');
@@ -179,7 +179,7 @@ describe('CodeTooltip._copyCode', () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
     const { ct } = makeTooltip();
-    ct._activePre = null;
+    ct._active = null;
     ct._copyCode();
     expect(writeText).not.toHaveBeenCalled();
   });
@@ -191,7 +191,7 @@ describe('CodeTooltip._toParagraph', () => {
   it('replaces pre with p preserving text', () => {
     const { ct, ctx } = makeTooltip();
     const pre = ctx.layoutInfo.editable.querySelector('pre');
-    ct._activePre = pre;
+    ct._active = pre;
     ct._toParagraph();
     expect(ctx.layoutInfo.editable.querySelector('pre')).toBeNull();
     expect(ctx.layoutInfo.editable.querySelector('p')).not.toBeNull();
@@ -200,7 +200,7 @@ describe('CodeTooltip._toParagraph', () => {
 
   it('does nothing when no activePre', () => {
     const { ct, ctx } = makeTooltip();
-    ct._activePre = null;
+    ct._active = null;
     ct._toParagraph();
     expect(ctx.invoke).not.toHaveBeenCalled();
   });
@@ -208,7 +208,7 @@ describe('CodeTooltip._toParagraph', () => {
   it('preserves multi-line content as br elements', () => {
     const { ct, ctx } = makeTooltip('<pre><code>line1\nline2</code></pre>');
     const pre = ctx.layoutInfo.editable.querySelector('pre');
-    ct._activePre = pre;
+    ct._active = pre;
     ct._toParagraph();
     const p = ctx.layoutInfo.editable.querySelector('p');
     expect(p).not.toBeNull();
@@ -222,7 +222,7 @@ describe('CodeTooltip._delete', () => {
   it('removes the pre block from DOM', () => {
     const { ct, ctx } = makeTooltip();
     const pre = ctx.layoutInfo.editable.querySelector('pre');
-    ct._activePre = pre;
+    ct._active = pre;
     ct._delete();
     expect(ctx.layoutInfo.editable.querySelector('pre')).toBeNull();
     expect(ctx.invoke).toHaveBeenCalledWith('editor.afterCommand');
@@ -230,7 +230,7 @@ describe('CodeTooltip._delete', () => {
 
   it('does nothing when no activePre', () => {
     const { ct, ctx } = makeTooltip();
-    ct._activePre = null;
+    ct._active = null;
     ct._delete();
     expect(ctx.invoke).not.toHaveBeenCalled();
   });
@@ -243,7 +243,7 @@ describe('CodeTooltip._syncWrapBtn', () => {
     const { ct, ctx } = makeTooltip();
     const pre = ctx.layoutInfo.editable.querySelector('pre');
     pre.style.whiteSpace = 'pre-wrap';
-    ct._activePre = pre;
+    ct._active = pre;
     ct._syncWrapBtn();
     expect(ct._wrapBtn.classList.contains('active')).toBe(true);
   });
@@ -252,14 +252,14 @@ describe('CodeTooltip._syncWrapBtn', () => {
     const { ct, ctx } = makeTooltip();
     const pre = ctx.layoutInfo.editable.querySelector('pre');
     pre.style.whiteSpace = '';
-    ct._activePre = pre;
+    ct._active = pre;
     ct._syncWrapBtn();
     expect(ct._wrapBtn.classList.contains('active')).toBe(false);
   });
 
   it('does nothing when no activePre', () => {
     const { ct } = makeTooltip();
-    ct._activePre = null;
+    ct._active = null;
     expect(() => ct._syncWrapBtn()).not.toThrow();
   });
 });
@@ -271,7 +271,7 @@ describe('CodeTooltip._syncLangSelect', () => {
     const { ct, ctx } = makeTooltip();
     const pre = ctx.layoutInfo.editable.querySelector('pre');
     pre.dataset.language = 'javascript';
-    ct._activePre = pre;
+    ct._active = pre;
     ct._syncLangSelect();
     expect(ct._langSelect.value).toBe('javascript');
   });
@@ -279,14 +279,14 @@ describe('CodeTooltip._syncLangSelect', () => {
   it('sets select value from code class language-xxx', () => {
     const { ct, ctx } = makeTooltip('<pre><code class="language-python">print()</code></pre>');
     const pre = ctx.layoutInfo.editable.querySelector('pre');
-    ct._activePre = pre;
+    ct._active = pre;
     ct._syncLangSelect();
     expect(ct._langSelect.value).toBe('python');
   });
 
   it('does nothing when no activePre', () => {
     const { ct } = makeTooltip();
-    ct._activePre = null;
+    ct._active = null;
     expect(() => ct._syncLangSelect()).not.toThrow();
   });
 });
@@ -298,7 +298,7 @@ describe('CodeTooltip._flashCopied', () => {
     vi.useFakeTimers();
     const { ct, ctx } = makeTooltip();
     const pre = ctx.layoutInfo.editable.querySelector('pre');
-    ct._activePre = pre;
+    ct._active = pre;
     const original = ct._copyBtn.innerHTML;
     ct._flashCopied();
     expect(ct._copyBtn.innerHTML).not.toBe(original);
@@ -320,7 +320,7 @@ describe('CodeTooltip._toggleWrap', () => {
     const { ct, ctx } = makeTooltip();
     const pre = ctx.layoutInfo.editable.querySelector('pre');
     pre.getBoundingClientRect = () => ({ top: 50, bottom: 200, left: 40, right: 400, width: 360, height: 150 });
-    ct._activePre = pre;
+    ct._active = pre;
     ct._toggleWrap();
     expect(pre.style.whiteSpace).toBe('pre-wrap');
     ct._toggleWrap();
@@ -329,7 +329,7 @@ describe('CodeTooltip._toggleWrap', () => {
 
   it('does nothing when no activePre', () => {
     const { ct } = makeTooltip();
-    ct._activePre = null;
+    ct._active = null;
     expect(() => ct._toggleWrap()).not.toThrow();
   });
 
@@ -337,7 +337,7 @@ describe('CodeTooltip._toggleWrap', () => {
     const { ct, ctx } = makeTooltip();
     const pre = ctx.layoutInfo.editable.querySelector('pre');
     pre.getBoundingClientRect = () => ({ top: 50, bottom: 200, left: 40, right: 400, width: 360, height: 150 });
-    ct._activePre = pre;
+    ct._active = pre;
     ct._toggleWrap();
     expect(ctx.invoke).toHaveBeenCalledWith('editor.afterCommand');
   });
@@ -349,7 +349,7 @@ describe('CodeTooltip._onLangChange', () => {
   it('updates language class on existing code element', () => {
     const { ct, ctx } = makeTooltip();
     const pre = ctx.layoutInfo.editable.querySelector('pre');
-    ct._activePre = pre;
+    ct._active = pre;
     ct._langSelect.value = 'python';
     ct._onLangChange();
     const codeEl = pre.querySelector('code');
@@ -359,7 +359,7 @@ describe('CodeTooltip._onLangChange', () => {
   it('creates code element if not present', () => {
     const { ct, ctx } = makeTooltip('<pre>some code text</pre>');
     const pre = ctx.layoutInfo.editable.querySelector('pre');
-    ct._activePre = pre;
+    ct._active = pre;
     ct._langSelect.value = 'python';
     ct._onLangChange();
     expect(pre.querySelector('code')).not.toBeNull();
@@ -369,7 +369,7 @@ describe('CodeTooltip._onLangChange', () => {
   it('clears language class when empty value selected', () => {
     const { ct, ctx } = makeTooltip();
     const pre = ctx.layoutInfo.editable.querySelector('pre');
-    ct._activePre = pre;
+    ct._active = pre;
     ct._langSelect.value = '';
     ct._onLangChange();
     const codeEl = pre.querySelector('code');
@@ -379,7 +379,7 @@ describe('CodeTooltip._onLangChange', () => {
 
   it('does nothing when no activePre', () => {
     const { ct } = makeTooltip();
-    ct._activePre = null;
+    ct._active = null;
     expect(() => ct._onLangChange()).not.toThrow();
   });
 });
@@ -396,7 +396,7 @@ describe('CodeTooltip._copyCode clipboard fallback', () => {
 
     const { ctx, ct } = makeTooltip();
     const pre = ctx.layoutInfo.editable.querySelector('pre');
-    ct._activePre = pre;
+    ct._active = pre;
 
     expect(() => ct._copyCode()).not.toThrow();
 
@@ -409,7 +409,7 @@ describe('CodeTooltip._copyCode clipboard fallback', () => {
 
     const { ctx, ct } = makeTooltip();
     const pre = ctx.layoutInfo.editable.querySelector('pre');
-    ct._activePre = pre;
+    ct._active = pre;
     const flashSpy = vi.spyOn(ct, '_flashCopied');
 
     ct._copyCode();
@@ -601,7 +601,7 @@ describe('CodeTooltip language switching', () => {
     // language silently switched line numbers back off.
     const { ctx, ct } = makeTooltip();
     const pre = ctx.layoutInfo.editable.querySelector('pre');
-    ct._activePre = pre;
+    ct._active = pre;
 
     ct._toggleLineNumbers();
     expect(pre.classList.contains('an-code-line-numbers')).toBe(true);
@@ -618,7 +618,7 @@ describe('CodeTooltip language switching', () => {
   it('replaces the previous language rather than accumulating them', () => {
     const { ctx, ct } = makeTooltip();
     const pre = ctx.layoutInfo.editable.querySelector('pre');
-    ct._activePre = pre;
+    ct._active = pre;
 
     ct._langSelect.value = 'javascript';
     ct._onLangChange();
@@ -633,7 +633,7 @@ describe('CodeTooltip language switching', () => {
   it('clears only the language class when switching back to plain text', () => {
     const { ctx, ct } = makeTooltip();
     const pre = ctx.layoutInfo.editable.querySelector('pre');
-    ct._activePre = pre;
+    ct._active = pre;
     ct._toggleLineNumbers();
 
     ct._langSelect.value = 'javascript';

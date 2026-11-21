@@ -46,7 +46,7 @@ const makeTooltip = (html) => {
 const activateTable = (tt, ctx) => {
   const table = ctx.layoutInfo.editable.querySelector('table');
   table.getBoundingClientRect = () => ({ top: 100, bottom: 300, left: 50, right: 400, width: 350, height: 200 });
-  tt._activeTable = table;
+  tt._active = table;
   tt._show();
   return table;
 };
@@ -89,7 +89,7 @@ describe('TableTooltip._show', () => {
 
   it('does nothing without activeTable', () => {
     const { tt } = makeTooltip();
-    tt._activeTable = null;
+    tt._active = null;
     tt._show();
     expect(tt._el.style.display).toBe('none');
   });
@@ -101,7 +101,7 @@ describe('TableTooltip._hide', () => {
     activateTable(tt, ctx);
     tt._hide();
     expect(tt._el.style.display).toBe('none');
-    expect(tt._activeTable).toBeNull();
+    expect(tt._active).toBeNull();
   });
 
   it('clears activeCell on hide', () => {
@@ -739,7 +739,7 @@ describe('TableTooltip._sortColumn', () => {
 
   it('does nothing when no active table', () => {
     const { tt } = makeTooltip();
-    tt._activeTable = null;
+    tt._active = null;
     expect(() => tt._sortColumn('asc')).not.toThrow();
   });
 
@@ -849,7 +849,7 @@ describe('TableTooltip._exportTableCSV', () => {
 
   it('does nothing when no active table', () => {
     const { tt } = makeTooltip();
-    tt._activeTable = null;
+    tt._active = null;
     expect(() => tt._exportTableCSV()).not.toThrow();
   });
 
@@ -941,7 +941,7 @@ describe('TableTooltip._toggleHeaderRow', () => {
 
   it('does nothing when no active table', () => {
     const { tt } = makeTooltip();
-    tt._activeTable = null;
+    tt._active = null;
     expect(() => tt._toggleHeaderRow()).not.toThrow();
   });
 });
@@ -960,7 +960,7 @@ describe('TableTooltip._applyBorderColor', () => {
 
   it('does nothing when no active table', () => {
     const { tt } = makeTooltip();
-    tt._activeTable = null;
+    tt._active = null;
     expect(() => tt._applyBorderColor('#000')).not.toThrow();
   });
 
@@ -1004,10 +1004,10 @@ describe('TableTooltip integrated event paths', () => {
 
     activateTable(tt, ctx);
     globalThis.dispatchEvent(new Event('scroll'));
-    expect(tt._activeTable).toBeNull();
+    expect(tt._active).toBeNull();
     activateTable(tt, ctx);
     globalThis.dispatchEvent(new Event('resize'));
-    expect(tt._activeTable).toBeNull();
+    expect(tt._active).toBeNull();
   });
 
   it('does not show on hover when the editor is disabled', () => {
@@ -1016,7 +1016,7 @@ describe('TableTooltip integrated event paths', () => {
     ctx.layoutInfo.container.classList.add('an-disabled');
     ctx.layoutInfo.editable.querySelector('td').dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
     vi.runAllTimers();
-    expect(tt._activeTable).toBeNull();
+    expect(tt._active).toBeNull();
   });
 
   it('opens, positions, applies, and dismisses cell shading controls', () => {
